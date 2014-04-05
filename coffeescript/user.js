@@ -46,10 +46,40 @@ Report.prototype={
 function Line(){
     this.left = 0;    
     this.top = 0 ;
-    this.right = 578-10;
-    this.bottom = 200-100;
+    this.width = 500;
+    this.height = 20;
+    this.cells = [];
 }
 Line.prototype ={
     constructor:Line,
+    addCell:function(cell){this.cells.push(cell);}
 }
-
+function Cell(){
+    this.width=50;
+    this.height = 20;
+}
+Cell.prototype={
+    constructor:Cell,
+    
+}
+function SampleReport(){
+    this.report = new Report();
+    var r = this.report ;
+    var line;
+    line = new Line();
+    r.lines.push(new Cell());
+    r.lines.push(new Cell());
+    r.lines.push(new Cell());
+    r.lines.push(new Cell());
+    r.addLine(line);
+    line = new Line();
+    r.lines.push(new Cell());
+    r.lines.push(new Cell());
+    r.lines.push(new Cell());
+    r.lines.push(new Cell());
+    r.addLine(line);
+    line.top += 20;
+}
+SampleReport.prototype={
+    constructor:SampleReport,
+}

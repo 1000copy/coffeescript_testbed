@@ -1,0 +1,14 @@
+User	coffeescript/user.js	1
+Person	coffeescript/user.js	23
+Report	coffeescript/user.js	33
+Line	coffeescript/user.js	46
+Cell	coffeescript/user.js	57
+SampleReport	coffeescript/user.js	65
+saveScore	coffeescript/user.js	10
+showNameAndScores	coffeescript/user.js	13
+changeEmail	coffeescript/user.js	18
+_string	coffeescript/user.js	29
+a	coffeescript/user.js	40
+setWidth	coffeescript/user.js	41
+addLine	coffeescript/user.js	42
+addCell	coffeescript/user.js	55
