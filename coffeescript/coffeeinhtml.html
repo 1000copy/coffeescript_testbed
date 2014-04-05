@@ -1,0 +1,82 @@
+<html>
+<head>
+<title>Widget test</title>
+<meta http-equiv="refresh" content="1" >
+<script src="user.js"></script>
+<script type="text/javascript" 
+src="lib/jquery.min.js">
+</script>
+<script type="text/javascript" 
+    src="lib/jquery-ui.min.js">
+</script>
+</head>
+
+<body>
+<h1 id="header" style="color: red">testbed js !</h1>
+<canvas id="myCanvas" width="578" height="200" style="border:1px solid #000000;"></canvas>
+<br/>
+<textarea 
+    style="width: 578px; height: 100px;"
+    type="text" id="head" ></textarea>
+<script>
+
+function a(){
+  var canvas = document.getElementById('myCanvas');
+  var context = canvas.getContext('2d');
+
+  context.beginPath();
+  context.moveTo(100, 150);
+  context.lineTo(450, 50);
+  context.lineTo(550, 50);
+  context.lineTo(450, 150);
+  context.lineTo(450, 250);
+  context.stroke();
+  function Page(){this.width=28;this.height=0;}
+  // Page.prototype.width = 28;
+  // Page.prototype.height = 30;
+  var page = new Page();
+  document.getElementById("header").value =  page.width;
+}
+function drawLine(line){
+  var canvas = document.getElementById('myCanvas');
+  var context = canvas.getContext('2d');
+
+  context.beginPath();
+  context.moveTo(line.left, line.top);
+  context.lineTo(line.right, line.top);
+  context.lineTo(line.right, line.bottom);
+  context.lineTo(line.left, line.bottom);
+  context.lineTo(line.left, line.top);
+  context.stroke();
+//   function Page(){this.width=28;this.height=0;}
+  // Page.prototype.width = 28;
+  // Page.prototype.height = 30;
+//   var page = new Page();
+//   document.getElementById("header").value =  page.width;
+}
+
+var user = new User("john","j@k.com");
+// document.getElementById("head").value = user.email; 
+$('#head').value = user.email+11;
+</script>
+
+<script type="text/javascript" >
+   function b(){
+       var p = new Person();
+       p.name = "xiang yu";
+       p.age = 30;
+       document.getElementById("head").value += p._string();
+       var r = new Report();
+       r.addLine(new Line());
+       $('#myCanvas').attr('width',r.width);
+       $('#myCanvas').attr('height',r.height);
+       r.lines.forEach(function(line){
+           drawLine(line)
+       })
+    //   a();
+   }
+   b();
+   
+</script>
+</body>
+</html>
