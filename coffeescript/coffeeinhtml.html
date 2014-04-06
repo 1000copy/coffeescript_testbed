@@ -1,7 +1,7 @@
 <html>
 <head>
 <title>Widget test</title>
-<meta http-equiv="refresh" content="10" >
+<meta http-equiv="refresh" content="3" >
 <script type="text/javascript" 
 src="lib/jquery.min.js">
 </script>
@@ -21,20 +21,6 @@ src="lib/jquery.min.js">
     style="width: 578px; height: 100px;"
     type="text" id="head" ></textarea>
 <script>
-function drawLine(line){
-  var canvas = document.getElementById('myCanvas');
-  var context = canvas.getContext('2d');
-
-  context.beginPath();
-//   context.moveTo(line.left, line.top);
-//   context.lineTo(line.right, line.top);
-//   context.lineTo(line.right, line.bottom);
-//   context.lineTo(line.left, line.bottom);
-//   context.lineTo(line.left, line.top);
-  context.rect(line.left,line.top,line.width,line.height);
-  context.stroke();
-}
-
 function drawCell(line){
   var canvas = document.getElementById('myCanvas');
   var context = canvas.getContext('2d');
@@ -48,40 +34,31 @@ function drawCell(line){
   context.rect(line.left,line.top,line.width,line.height);
   context.stroke();
 }
-
-// var user = new User("john","j@k.com");
-// document.getElementById("head").value = user.email; 
-// $('#head').value = user.email+11;
 function log(str){
-     document.getElementById("head").value = str; 
+     document.getElementById("head").value += str+'\n'; 
+}
+function clear(str){
+     document.getElementById("head").value = ""; 
 }
 </script>
 
 <script type="text/javascript" >
    function b(){
-    //   var p = new Person();
-    //   p.name = "xiang yu";
-    //   p.age = 30;
-    //   document.getElementById("head").value += p._string();
        var r = new SampleReport();
        $('#myCanvas').attr('width',r.width);
        $('#myCanvas').attr('height',r.height);
-    //   log(r.lines.length);
-       log(r.lines[0].cells.length);
-    //   return;
+    //   log(r.lines[0].cells.length);
+    //   clear();
        r.lines.forEach(function(line){
-        //   log(line.cells);
            if (line.cells)
-           line.cells.forEach(function(cell){
-            drawCell(cell);
-            log(1);
-           })
-           
+               var top = line.top;
+               line.cells.forEach(function(cell){
+                cell.top += top;
+                drawCell(cell);
+               })
        })
-    //   a();
    }
    b();
-//   log(test_oop_inhr());
 </script>
 </body>
 </html>

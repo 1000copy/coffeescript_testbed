@@ -1,6 +1,6 @@
 
 var Report = Class.extend({
-      init: function(isDancing){
+      init: function(){
         this.width = 578;
         this.height = 200;
         this.lines =[];
@@ -35,18 +35,28 @@ var SampleLine = Line.extend({
     init:function(){
        this._super();
        var i;
-       for(i=0;i<=3;i++)
-        this.addCell(new Cell());    
+       var nl;
+       for(i=0;i < 4;i++){
+           var cell = new Cell();
+           cell.left = i*cell.width;
+           cell.top += this.top;
+        //   log("cell.top"+this.top);
+        //   log("cell.top"+cell.top);
+           this.addCell(cell);
+       }
     },
 })
 var SampleReport = Report.extend({
   init:function (){
        this._super();
        var r = this;
-       var line;
-       r.addLine(new SampleLine());
-       line = new SampleLine();
-       r.addLine(line);
-       line.top += 20;
+       var line;var i;
+       for (i=0;i<4;i++){
+           line =  new SampleLine();
+        //   log("line.h"+line.height);
+           line.top = i*line.height;
+        //   log("line.t"+line.top);
+           r.addLine(line);
+       }
    },
 });
