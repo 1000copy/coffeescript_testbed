@@ -1,14 +1,16 @@
 <html>
 <head>
 <title>Widget test</title>
-<meta http-equiv="refresh" content="1" >
-<script src="user.js"></script>
+<meta http-equiv="refresh" content="10" >
 <script type="text/javascript" 
 src="lib/jquery.min.js">
 </script>
 <script type="text/javascript" 
     src="lib/jquery-ui.min.js">
 </script>
+<script type="text/javascript" src="ejohn.js">
+</script>
+<script src="report.js"></script>
 </head>
 
 <body>
@@ -33,27 +35,53 @@ function drawLine(line){
   context.stroke();
 }
 
-var user = new User("john","j@k.com");
+function drawCell(line){
+  var canvas = document.getElementById('myCanvas');
+  var context = canvas.getContext('2d');
+
+  context.beginPath();
+//   context.moveTo(line.left, line.top);
+//   context.lineTo(line.right, line.top);
+//   context.lineTo(line.right, line.bottom);
+//   context.lineTo(line.left, line.bottom);
+//   context.lineTo(line.left, line.top);
+  context.rect(line.left,line.top,line.width,line.height);
+  context.stroke();
+}
+
+// var user = new User("john","j@k.com");
 // document.getElementById("head").value = user.email; 
-$('#head').value = user.email+11;
+// $('#head').value = user.email+11;
+function log(str){
+     document.getElementById("head").value = str; 
+}
 </script>
 
 <script type="text/javascript" >
    function b(){
-       var p = new Person();
-       p.name = "xiang yu";
-       p.age = 30;
-       document.getElementById("head").value += p._string();
+    //   var p = new Person();
+    //   p.name = "xiang yu";
+    //   p.age = 30;
+    //   document.getElementById("head").value += p._string();
        var r = new SampleReport();
        $('#myCanvas').attr('width',r.width);
        $('#myCanvas').attr('height',r.height);
-       r.report.lines.forEach(function(line){
-           drawLine(line)
+    //   log(r.lines.length);
+       log(r.lines[0].cells.length);
+    //   return;
+       r.lines.forEach(function(line){
+        //   log(line.cells);
+           if (line.cells)
+           line.cells.forEach(function(cell){
+            drawCell(cell);
+            log(1);
+           })
+           
        })
     //   a();
    }
    b();
-   
+//   log(test_oop_inhr());
 </script>
 </body>
 </html>
