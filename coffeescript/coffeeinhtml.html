@@ -21,42 +21,53 @@ src="lib/jquery.min.js">
     style="width: 578px; height: 100px;"
     type="text" id="head" ></textarea>
 <script>
-function drawCell(line){
-  var canvas = document.getElementById('myCanvas');
-  var context = canvas.getContext('2d');
-
-  context.beginPath();
-//   context.moveTo(line.left, line.top);
-//   context.lineTo(line.right, line.top);
-//   context.lineTo(line.right, line.bottom);
-//   context.lineTo(line.left, line.bottom);
-//   context.lineTo(line.left, line.top);
-  context.rect(line.left,line.top,line.width,line.height);
-  context.stroke();
-}
-function log(str){
-     document.getElementById("head").value += str+'\n'; 
-}
-function clear(str){
-     document.getElementById("head").value = ""; 
-}
+var Canvas = Class.extend({
+    init:function(report,canvasName){
+        this.report = report;
+        this.canvas = document.getElementById(canvasName);
+        this.context = this.canvas.getContext('2d');
+    },
+    drawCell:function(line){
+      var context = this.context;
+      context.beginPath();
+      context.rect(line.left,line.top,line.width,line.height);
+      context.fillText(line.text,line.left,line.height+line.top);
+      context.stroke();
+    },
+    drawMargin:function (margin){
+      var context = this.context;
+      context.beginPath();
+      context.rect(margin.left,margin.top,margin.width,margin.height);
+      context.fillText(line.text,line.left,line.height+line.top);
+      context.stroke();
+    },
+    draw:function(){
+        var c = this;
+        this.report.lines.forEach(function(line){
+            if (line.cells)
+                var top = line.top;
+                line.cells.forEach(function(cell){
+                 cell.top += top;
+                 c.drawCell(cell);
+            })
+        })
+    },
+    log:function(str){
+         document.getElementById("head").value += str+'\n'; 
+    },
+    clear:function (str){
+         document.getElementById("head").value = ""; 
+    }
+})
 </script>
 
 <script type="text/javascript" >
    function b(){
-       var r = new SampleReport();
+       var r = new SampleModel();
+       var c =  new Canvas(r,"myCanvas");
        $('#myCanvas').attr('width',r.width);
        $('#myCanvas').attr('height',r.height);
-    //   log(r.lines[0].cells.length);
-    //   clear();
-       r.lines.forEach(function(line){
-           if (line.cells)
-               var top = line.top;
-               line.cells.forEach(function(cell){
-                cell.top += top;
-                drawCell(cell);
-               })
-       })
+       c.draw();
    }
    b();
 </script>
