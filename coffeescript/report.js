@@ -21,7 +21,27 @@ var Line = Class.extend({
         this.height = 20;
         this.cells = [];
     },
-    addCell:function(cell){this.cells.push(cell);}
+    clone:function(record){
+      var r = new Line();
+      r.left = this.left;
+      r.top = this.top;
+      r.width = this.width;
+      r.height = this.height;
+      var i ;
+      for (i=0;i<this.cells.length;i++)
+        r.cells.push(this.cells[i].clone(record));
+      return r;
+    },
+    addCell:function(cell){this.cells.push(cell);},
+    isDetailLine:function(){
+        var i;
+        for (i=0;i<this.cells.length;i++){
+            if (this.cells[i].isDetailCell()){
+                return true;
+            }
+        }
+        return false;
+    }
 })     
 var Cell = Line.extend({
     init:function(){
@@ -32,6 +52,26 @@ var Cell = Line.extend({
         this.height = 20;    
         this.text = "-"
     },
+    isDetailCell:function(){
+        return this.text.indexOf("#")===0 ;
+    },
+    clone:function(record){
+        var r = new Cell();
+        r.left = this.left;
+        r.top = this.top;
+        r.width = this.width;
+        r.height = this.height;   
+        r.text = this.text;
+        if (r.text.indexOf("#") ===0){
+            var fieldname = r.text.substring(1,r.text.length);
+            if (fieldname in record){
+                // r.text = record.fieldname;
+                r.text = record[fieldname];
+            }
+        }
+          
+        return r;
+    }
 })
 
 // sample report 
@@ -81,7 +121,7 @@ var SampleModel = Report.extend({
        var r = this;
        var line;var i;
        for (i=0;i<4;i++){
-           if (i!=1)
+           if (i!=1 && i!= 2 )
             line =  new SampleLine();
            else
             line = new DetailLine();
@@ -90,10 +130,85 @@ var SampleModel = Report.extend({
        }
    },
 })
-
-var SampleRender = Class.extend({
-    
+var SampleData = Class.extend({
+    init:function(){
+        this.content = [
+            {field1:"line1"},
+            {field1:2},
+            {field1:3}
+        ]
+    }
 })
+var SampleRender = Class.extend({
+    init:function(report ,detaildata){
+        this.detaildata = detaildata;
+        this.lines = [];
+        this.detailRange = {start:0,len:0}
+        this.report = report ;
+        this.baseline = 0 ;
+    },
+    getDetailRange:function(){
+        var r = {start:0,len:0};var i;
+        // from start to end 
+        for(i=0;i<this.report.lines.length;i++){
+            var line = this.report.lines[i];
+            if (line.isDetailLine()){
+               r.start = i;
+               break;
+            }
+        }
+        // from end to start
+        for(i=this.report.lines.length-1;i>=0;i--){
+            var line = this.report.lines[i];
+            if (line.isDetailLine()){
+               r.end = i;
+               break;
+            }
+        }
+        return r;
+    },
+    run:function(){
+        this.detailRange = this.getDetailRange();
+        this.lines = this.fillLines();
+    },
+    fillLines:function(){
+        return this.fillHeadLines()
+            .concat(this.fillDetailLines())
+            .concat(this.fillTailLines());
+    },
+    fillHeadLines:function(){
+        return this.cloneRange(0,this.detailRange.start-1);
+    },
+    fillDetailLines:function(){
+        var answer = [];
+        var i,j;
+        // outer clone
+        for (j=0;j<this.detaildata.content.length;j++){
+            // inner clone
+            for (i= this.detailRange.start;i<=this.detailRange.end;i++){
+                var line = this.report.lines[i];
+                var nl =  line.clone(this.detaildata.content[j]);
+                answer.push(nl);
+            }    
+        }
+        return answer ;
+    },
+    fillTailLines:function(){
+       return this.cloneRange(
+                    this.detailRange.end+1,
+                    this.report.lines.length-1);
+    },
+    cloneRange:function(start,end){
+        var answer = [];
+        var i;
+        for (i=start;i<=end;i++){
+            var line = this.report.lines[i];
+            var nl =  line.clone();
+            answer.push(nl);
+        }
+        return answer ;
+    },
+});
 
 
 

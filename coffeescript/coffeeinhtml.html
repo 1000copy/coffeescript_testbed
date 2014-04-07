@@ -57,7 +57,23 @@ var Canvas = Class.extend({
     },
     clear:function (str){
          document.getElementById("head").value = ""; 
+    },
+    c:function(){
+           var r = new SampleModel();
+           var d = new SampleData();
+           var s = new SampleRender(r,d);
+           s.run();
+           this.log(s.detailRange.start);
+           this.log(s.detailRange.end);
+           this.log(s.lines.length);
+           this.clear();
+           var i;
+           for(i=0;i<s.lines.length;i++){
+             this.log(s.lines[i].cells[0].text)    
+           }
+           
     }
+    
 })
 </script>
 
@@ -68,8 +84,9 @@ var Canvas = Class.extend({
        $('#myCanvas').attr('width',r.width);
        $('#myCanvas').attr('height',r.height);
        c.draw();
+       c.c();
    }
    b();
-</script>
+   </script>
 </body>
 </html>
