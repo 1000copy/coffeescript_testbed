@@ -87,7 +87,7 @@ function SimpleReport(){
        }
 }
 function  SimpleLine (){
-       Line.apply(this, arguments);
+       Line.apply(this, arguments);// Like super
        // this.addCell(null);
        var i;
        var nl;
