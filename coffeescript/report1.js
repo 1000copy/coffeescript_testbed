@@ -214,5 +214,9 @@ extend(DetailCell,Cell);
        for(i=0;i<s.lines.length;i++){
          cc.log(s.lines[i].cells[0].text);
        }
-})()
+})
+
+
+
+
 
