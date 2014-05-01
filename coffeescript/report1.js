@@ -201,21 +201,40 @@ extend(SimpleLine,Line);
 extend(DetailLine,Line);
 extend(DetailCell,Cell);
 
-(function r(){
-       var rr = new SimpleReport();
-       var d = new SimpleData();
-       var s = new SampleRender(rr,d);
-       s.run();
-       var cc = console;
-       cc.log("detail start :",s.detailRange.start," end:",s.detailRange.end);
-       // render lines 
-       cc.log(s.lines.length);
-       var i;
-       for(i=0;i<s.lines.length;i++){
-         cc.log(s.lines[i].cells[0].text);
-       }
-})
 
+(function r(){
+  var report_model = {
+    width:570,
+    height:200,
+    lines:[
+    {
+      left : 0,
+      top:0,
+      width:500,
+      height:20,
+      cells:
+        [
+          {width:50,text:"-"},
+          {width:50,text:"-"},
+          {width:50,text:"-"},
+          {width:50,text:"-"}
+        ]
+    }
+    ]
+  };
+  var rr = new SimpleReport();
+  var d = new SimpleData();
+  var s = new SampleRender(rr,d);
+  s.run();
+  var cc = console;
+  cc.log("detail start :",s.detailRange.start," end:",s.detailRange.end);
+  // render lines 
+  cc.log(s.lines.length);
+  var i;
+  for(i=0;i<s.lines.length;i++){
+   cc.log(s.lines[i].cells[0].text);
+  }
+})();
 
 
 
