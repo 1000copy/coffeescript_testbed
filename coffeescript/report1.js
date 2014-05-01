@@ -7,16 +7,17 @@ function extend(Child, Parent) {
 　　Child.uber = Parent.prototype;
 }
 function Report(){
-       this.width = 578;
-       this.height = 200;
+       this.width = this.DEFAULT_PAGE_WIDTH;
+       this.height = this.DEFAULT_PAGE_HEIGHT;
        this.lines =[];
        this.margin = {left:10,top:10,right:10,bottom:10};
 }
-function Line(){
+function Line(report){
+    this.report = report ;
     this.left = 0;    
     this.top = 0 ;
-    this.width = 500;
-    this.height = 20;
+    this.width = report.DEFAULT_LINE_WIDTH;
+    this.height = report.DEFAULT_LINE_HEIGHT;
     this.cells = [];
 }
 function Cell(){
@@ -24,8 +25,51 @@ function Cell(){
        this.height = 20;    
        this.text = "#"
 }
+Report.prototype.DEFAULT_LINE_HEIGHT = 20;
+Report.prototype.DEFAULT_LINE_WIDTH = 300;
+Report.prototype.DEFAULT_CELL_WIDTH = 50;
+Report.prototype.DEFAULT_PAGE_WIDTH = 578;
+Report.prototype.DEFAULT_PAGE_HEIGHT = 200;
+
 Report.prototype.addLine= function(line){
        this.lines.push(line)
+}
+Report.prototype.relocateTop=function(){
+  var i = 0;
+  var pre_line = null;
+  for(i= 0;i<this.lines.length;i++){
+    var line = this.lines[i];
+    if (pre_line !=null){
+      line.top = pre_line.top + pre_line.height;
+      // console.log(pre_line.top ,pre_line.height);
+      pre_line = line;
+    }
+    else{
+      pre_line = line;
+    }
+
+  }
+}
+Report.prototype.detailRange= function(){
+  var lines = this.lines;var i;
+  var start =0;
+  for (i= 0;i<lines.length;i++){
+    var line = lines[i];
+    if (line.isDetailLine()){
+      start = i;
+      break;
+    }
+  }
+  var end = lines.length - 1;
+  for (i= lines.length-1;i>=0;i--){
+    var line = lines[i];
+    if (line.isDetailLine()){
+      end = i;
+      break;
+    }
+  }
+  if (end >= start)return [start ,end];
+  else return [];
 }
 Report.prototype.getLines=function(){
        return this.lines;
@@ -52,6 +96,24 @@ Line.prototype.isDetailLine=function(){
     }
     return false;
 }
+Line.prototype.default=function(){
+  this.cells = [
+    new Cell(),
+    new Cell(),
+    new Cell(),
+    new Cell()
+  ];
+  return this;
+}
+Line.prototype.defaultDetail=function(text){
+  this.cells = [
+    new Cell().defaultDetail(text),
+    new Cell().defaultDetail(text),
+    new Cell().defaultDetail(text),
+    new Cell().defaultDetail(text)
+  ];
+  return this;
+}
 function Cell(){
        this.width=50;
        this.text = "-"
@@ -59,6 +121,10 @@ function Cell(){
 }
 Cell.prototype.isDetailCell=function(){
     return this.text.indexOf("#")===0 ;
+}
+Cell.prototype.defaultDetail=function(text){
+  this.text = text;
+  return this;
 }
 Cell.prototype.render=function(record){
     var r = new Cell();
@@ -204,22 +270,19 @@ extend(DetailCell,Cell);
 
 (function r(){
   var report_model = {
-    width:570,
-    height:200,
     lines:[
-    {
-      left : 0,
-      top:0,
-      width:500,
-      height:20,
-      cells:
-        [
-          {width:50,text:"-"},
-          {width:50,text:"-"},
-          {width:50,text:"-"},
-          {width:50,text:"-"}
-        ]
-    }
+      {
+        cells:[{},{},{},{}],
+      },
+      {
+        cells:[{},{},{},{}],
+      },
+      {
+        cells:[{},{},{},{}],
+      },
+      {
+        cells:[{},{},{},{}],
+      }
     ]
   };
   var rr = new SimpleReport();
@@ -234,7 +297,27 @@ extend(DetailCell,Cell);
   for(i=0;i<s.lines.length;i++){
    cc.log(s.lines[i].cells[0].text);
   }
-})();
+});
+(function (){
+  var r = new Report();
+  // console.log(r.width==r.DEFAULT_PAGE_WIDTH);
+  // console.log(r.width);
+  // console.log(r.DEFAULT_PAGE_WIDTH);
+  r.lines = ([
+    new Line(r).default(),
+    new Line(r).defaultDetail("#field1"),
+    new Line(r).defaultDetail("#field1"),
+    new Line(r).default()
+    ]);
+  console.log(r.lines.length ==4);
+  console.log(r.lines[0].cells.length ==4);
+  console.log(r.detailRange().toString()==[1,2].toString());
+  r.relocateTop();
+  console.log(r.lines[0].top ==0*r.DEFAULT_LINE_HEIGHT);
+  console.log(r.lines[1].top ==1*r.DEFAULT_LINE_HEIGHT);
+  console.log(r.lines[2].top ==2*r.DEFAULT_LINE_HEIGHT);
+  console.log(r.lines[3].top ==(3*r.DEFAULT_LINE_HEIGHT));
+})()
 
 
 
