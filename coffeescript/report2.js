@@ -13,10 +13,10 @@ function Report(){
        this.margin = {left:10,top:10,right:10,bottom:10};
 }
 function Line(){
-    this.left = 0;    
-    this.top = 0 ;
-    this.width = 500;
-    this.height = 20;
+    this.left = undefined;    
+    this.top = undefined ;
+    this.width = undefined;
+    this.height = undefined;
     this.cells = [];
 }
 function Cell(){
@@ -27,8 +27,29 @@ function Cell(){
 Report.prototype.addLine= function(line){
        this.lines.push(line)
 }
+
+Report.prototype.DEFAULT={LINE:{HEIGHT:20}};
+
 Report.prototype.getLines=function(){
-       return this.lines;
+  return this.lines;
+}
+Report.prototype.locateTop=function(){
+  var i;
+  var preLine =undefined;
+  for(i=0;i<this.lines.length;i++){
+    var line = this.lines[i];
+    if (preLine == undefined){      
+      if (line.top === undefined)
+        line.top = this.margin.top;
+      if (line.height === undefined)
+        line.height = this.DEFAULT.LINE.HEIGHT;      
+    }else{
+      line.top = preLine.top+preLine.height;
+      if (line.height === undefined)
+        line.height = this.DEFAULT.LINE.HEIGHT;
+    }
+    preLine = line;
+  }
 }
 Report.prototype.fromModel=function(model){
   if (model.hasOwnProperty("lines")){var i;
@@ -40,6 +61,10 @@ Report.prototype.fromModel=function(model){
   }
 }
 Line.prototype.fromModel=function(model){
+ if (model.hasOwnProperty("height"))
+  this.height = model.height;
+ if (model.hasOwnProperty("width"))
+  this.width = model.width;
  if (model.hasOwnProperty("cells")){var i;
     for(i= 0;i<model.cells.length;i++){
       var cell = new Cell();
@@ -143,11 +168,11 @@ Render.prototype.fillDetailLines=function(){
         var answer = [];
         var i,j;
         // outer clone
-        for (j=0;j<this.detaildata.content.length;j++){
+        for (j=0;j<this.detaildata.length;j++){
             // inner clone
             for (i= this.detailRange.start;i<=this.detailRange.end;i++){
                 var line = this.report.lines[i];
-                var nl =  line.render(this.detaildata.content[j]);
+                var nl =  line.render(this.detaildata[j]);
                 answer.push(nl);
             }    
         }
@@ -176,11 +201,24 @@ Render.prototype.cloneRange=function(start,end){
 
 var report_model = {    
       lines:[
+      {cells:[{},{},{},{},]},
       {      
         cells:
           [
-            {},{},{},{},          
+            {text:"#field1",width:40},{},{},{},          
           ]
+      },
+      {cells:[{},{},{},{},]},
+      {cells:[{},{},{},{},]},
+    ]
+};
+
+var report_model1 = {    
+      lines:[
+      {      
+        height:21,
+        width:501,
+        cells:[{},{},{},{},]
       },
       {      
         cells:
@@ -188,31 +226,58 @@ var report_model = {
             {text:"#field1",width:40},{},{},{},          
           ]
       },
-      {      
-        cells:
-          [
-            {},{},{},{},          
-          ]
-      },
-      {      
-        cells:
-          [
-            {},{},{},{},          
-          ]
-      }
+      {cells:[{},{},{},{},]},
+      {cells:[{},{},{},{},]},
     ]
 };
+// exports.fromModelTest=function(t){
+//   var report = new Report ();
+//   report.fromModel(report_model);
+//   t.equal(4,report.lines.length,"");
+//   t.equal(4,report.lines[0].cells.length,"");
+//   t.equal(4,report.lines[1].cells.length,"");
+//   t.equal(4,report.lines[2].cells.length,"");
+//   t.equal(4,report.lines[3].cells.length,"");
+//   t.equal("#field1",report.lines[1].cells[0].text,"");
+//   t.equal(40,report.lines[1].cells[0].width,"");
+//   t.done();
+// }
+// function SampleData(){
+    
+// }
 
-exports.fromModelTest=function(t){
-  var report = new Report ();
-  report.fromModel(report_model);
-  t.equal(4,report.lines.length,"");
-  t.equal(4,report.lines[0].cells.length,"");
-  t.equal(4,report.lines[1].cells.length,"");
-  t.equal(4,report.lines[2].cells.length,"");
-  t.equal(4,report.lines[3].cells.length,"");
-  t.equal("#field1",report.lines[1].cells[0].text,"");
-  t.equal(40,report.lines[1].cells[0].width,"");
+// exports.fromModelTest=function(t){
+//   var content = [
+//         {field1:"line1"},
+//         {field1:2},
+//         {field1:3}
+//     ]
+//   var report = new Report ();
+//   report.fromModel(report_model);
+//   var render = new Render(report,content);
+//   render.run();
+//   t.equal(6,render.lines.length,"");
+//   t.done();
+// }
+exports.TopLocate=function(t){
+  var r = new Report ();
+  r.fromModel(report_model);
+  r.locateTop();
+  // t.equal(4,r.lines.length,"");
+  t.equal(r.margin.top,r.lines[0].top,"");
+  t.equal(r.margin.top+r.DEFAULT.LINE.HEIGHT,r.lines[1].top,"");
+  t.equal(r.margin.top+2*r.DEFAULT.LINE.HEIGHT,r.lines[2].top,"");
+  t.equal(r.margin.top+3*r.DEFAULT.LINE.HEIGHT,r.lines[3].top,"");
   t.done();
 }
-
+exports.TopLocate1=function(t){
+  var r = new Report ();
+  r.fromModel(report_model1);
+  r.locateTop();
+  // t.equal(4,r.lines.length,"");
+  t.equal(r.margin.top,r.lines[0].top,"");
+  t.equal(r.margin.top+r.DEFAULT.LINE.HEIGHT+1,r.lines[1].top,"");
+  t.equal(r.margin.top+2*r.DEFAULT.LINE.HEIGHT+1,r.lines[2].top,"");
+  t.equal(r.margin.top+3*r.DEFAULT.LINE.HEIGHT+1,r.lines[3].top,"");
+  t.done();
+}
