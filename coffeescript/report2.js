@@ -30,6 +30,24 @@ Report.prototype.addLine= function(line){
 Report.prototype.getLines=function(){
        return this.lines;
 }
+Report.prototype.fromModel=function(model){
+  if (model.hasOwnProperty("lines")){var i;
+    for(i= 0;i<model.lines.length;i++){
+      var line = new Line();
+      line.fromModel(model.lines[i]);
+      this.lines.push(line);
+    }
+  }
+}
+Line.prototype.fromModel=function(model){
+ if (model.hasOwnProperty("cells")){var i;
+    for(i= 0;i<model.cells.length;i++){
+      var cell = new Cell();
+      cell.fromModel(model.cells[i]);
+      this.cells.push(cell);
+    }
+  } 
+}
 Line.prototype.render=function(record){
   var r = new Line();
   r.left = this.left;
@@ -57,6 +75,14 @@ function Cell(){
        this.text = "-"
        this.cells = [];// sub cells
 }
+Cell.prototype.fromModel=function(model){
+ if (model.hasOwnProperty("text")){        
+    this.text = model.text;   
+  } 
+  if (model.hasOwnProperty("width")){        
+    this.width = model.width;   
+  } 
+}
 Cell.prototype.isDetailCell=function(){
     return this.text.indexOf("#")===0 ;
 }
@@ -73,68 +99,15 @@ Cell.prototype.render=function(record){
     return r;
 }
 
-function SimpleReport(){
-       Report.apply(this, arguments);
-       var r = this;
-       var line;var i;
-       for (i=0;i<4;i++){
-           if (i!=1 && i!= 2 )
-            line =  new SimpleLine();
-           else
-            line = new DetailLine();
-           line.top = i*line.height;
-           r.addLine(line);
-       }
-}
-function  SimpleLine (){
-       Line.apply(this, arguments);// Like super
-       // this.addCell(null);
-       var i;
-       var nl;
-       for(i=0;i < 4;i++){
-           var cell;
-           cell = new SimpleCell();
-           cell.left = i*cell.width;
-           cell.top += this.top;
-           this.addCell(cell);
-       }
-}
-function  DetailLine (){
-       Line.apply(this, arguments);
-       var i;
-       var nl;
-       for(i=0;i < 4;i++){
-           var cell;
-           cell = new DetailCell();
-           cell.left = i*cell.width;
-           cell.top += this.top;
-           this.addCell(cell);
-       }
-}
-function SimpleCell(){
-       Cell.apply(this, arguments);
-       this.text = "simple"
-}
-function DetailCell(){
-       Cell.apply(this, arguments);
-       this.text = "#field1"
-}
-function SimpleData(){
-       this.content = [
-           {field1:"line1"},
-           {field1:2},
-           {field1:3}
-       ]
-}
 
-function SampleRender(report ,detaildata){
+function Render(report ,detaildata){
         this.detaildata = detaildata;
         this.lines = [];
         this.detailRange = {start:0,len:0}
         this.report = report ;
         this.baseline = 0 ;
 }
-SampleRender.prototype.getDetailRange=function(){
+Render.prototype.getDetailRange=function(){
  var r = {start:0,len:0};var i;
  // from start to end 
  for(i=0;i<this.report.lines.length;i++){
@@ -154,19 +127,19 @@ SampleRender.prototype.getDetailRange=function(){
  }
  return r;
 }
-SampleRender.prototype.run=function(){
+Render.prototype.run=function(){
         this.detailRange = this.getDetailRange();
         this.lines = this.fillLines();
 }
-SampleRender.prototype.fillLines=function(){
+Render.prototype.fillLines=function(){
         return this.fillHeadLines()
             .concat(this.fillDetailLines())
             .concat(this.fillTailLines());
 }
-SampleRender.prototype.fillHeadLines=function(){
+Render.prototype.fillHeadLines=function(){
         return this.cloneRange(0,this.detailRange.start-1);
 }
-SampleRender.prototype.fillDetailLines=function(){
+Render.prototype.fillDetailLines=function(){
         var answer = [];
         var i,j;
         // outer clone
@@ -180,12 +153,12 @@ SampleRender.prototype.fillDetailLines=function(){
         }
         return answer ;
 }
-SampleRender.prototype.fillTailLines=function(){
+Render.prototype.fillTailLines=function(){
        return this.cloneRange(
                     this.detailRange.end+1,
                     this.report.lines.length-1);
 }
-SampleRender.prototype.cloneRange=function(start,end){
+Render.prototype.cloneRange=function(start,end){
        var answer = [];
        var i;
        for (i=start;i<=end;i++){
@@ -195,12 +168,11 @@ SampleRender.prototype.cloneRange=function(start,end){
        }
        return answer ;
 }
-extend(SimpleReport,Report);
-extend(SimpleCell,Cell);
-extend(SimpleLine,Line);
-extend(DetailLine,Line);
-extend(DetailCell,Cell);
-
+// extend(SimpleReport,Report);
+// extend(SimpleCell,Cell);
+// extend(SimpleLine,Line);
+// extend(DetailLine,Line);
+// extend(DetailCell,Cell);
 
 var report_model = {    
       lines:[
@@ -213,7 +185,7 @@ var report_model = {
       {      
         cells:
           [
-            {text:"#field1"},{},{},{},          
+            {text:"#field1",width:40},{},{},{},          
           ]
       },
       {      
@@ -232,7 +204,15 @@ var report_model = {
 };
 
 exports.fromModelTest=function(t){
-  t.ok(true);
+  var report = new Report ();
+  report.fromModel(report_model);
+  t.equal(4,report.lines.length,"");
+  t.equal(4,report.lines[0].cells.length,"");
+  t.equal(4,report.lines[1].cells.length,"");
+  t.equal(4,report.lines[2].cells.length,"");
+  t.equal(4,report.lines[3].cells.length,"");
+  t.equal("#field1",report.lines[1].cells[0].text,"");
+  t.equal(40,report.lines[1].cells[0].width,"");
   t.done();
 }
 
