@@ -12,12 +12,13 @@ function Report(){
        this.lines =[];
        this.margin = {left:10,top:10,right:10,bottom:10};
 }
-function Line(){
-    this.left = undefined;    
-    this.top = undefined ;
-    this.width = undefined;
-    this.height = undefined;
-    this.cells = [];
+function Line(report){
+  this.report = report ;
+  this.left = undefined;    
+  this.top = undefined ;
+  this.width = undefined;
+  this.height = undefined;
+  this.cells = [];
 }
 function Cell(){
        this.width=50;
@@ -28,10 +29,22 @@ Report.prototype.addLine= function(line){
        this.lines.push(line)
 }
 
-Report.prototype.DEFAULT={LINE:{HEIGHT:20}};
+Report.prototype.DEFAULT={LINE:{HEIGHT:20},CELL:{WIDTH:50}};
 
 Report.prototype.getLines=function(){
   return this.lines;
+}
+
+Report.prototype.locateLeft=function(){
+  var i;
+  // var preCell =undefined;
+  for(i=0;i<this.lines.length;i++){
+    var line = this.lines[i];
+    if (line.left === undefined){
+        line.left = this.margin.left;
+        line.locateLeft();
+      }
+  }
 }
 Report.prototype.locateTop=function(){
   var i;
@@ -54,12 +67,28 @@ Report.prototype.locateTop=function(){
 Report.prototype.fromModel=function(model){
   if (model.hasOwnProperty("lines")){var i;
     for(i= 0;i<model.lines.length;i++){
-      var line = new Line();
+      var line = new Line(this);
       line.fromModel(model.lines[i]);
       this.lines.push(line);
     }
   }
 }
+Line.prototype.locateLeft=function(){
+  var i;
+  var preCell =undefined;
+  for(i=0;i<this.cells.length;i++){
+    var cell = this.cells[i];
+    if (preCell === undefined){
+        cell.left = this.left ;      
+        if (cell.width ===undefined)  
+          cell.width = this.report.DEFAULT.CELL.WIDTH;
+    }else{
+      cell.left = preCell.left + preCell.width;
+    }
+    preCell = cell;
+  }
+}
+
 Line.prototype.fromModel=function(model){
  if (model.hasOwnProperty("height"))
   this.height = model.height;
@@ -74,7 +103,7 @@ Line.prototype.fromModel=function(model){
   } 
 }
 Line.prototype.render=function(record){
-  var r = new Line();
+  var r = new Line(this.report);
   r.left = this.left;
   r.top = this.top;
   r.width = this.width;
@@ -259,7 +288,7 @@ var report_model1 = {
 //   t.equal(6,render.lines.length,"");
 //   t.done();
 // }
-exports.TopLocate=function(t){
+exports.ReportTopLocate=function(t){
   var r = new Report ();
   r.fromModel(report_model);
   r.locateTop();
@@ -270,7 +299,7 @@ exports.TopLocate=function(t){
   t.equal(r.margin.top+3*r.DEFAULT.LINE.HEIGHT,r.lines[3].top,"");
   t.done();
 }
-exports.TopLocate1=function(t){
+exports.ReportTopLocate1=function(t){
   var r = new Report ();
   r.fromModel(report_model1);
   r.locateTop();
@@ -279,5 +308,34 @@ exports.TopLocate1=function(t){
   t.equal(r.margin.top+r.DEFAULT.LINE.HEIGHT+1,r.lines[1].top,"");
   t.equal(r.margin.top+2*r.DEFAULT.LINE.HEIGHT+1,r.lines[2].top,"");
   t.equal(r.margin.top+3*r.DEFAULT.LINE.HEIGHT+1,r.lines[3].top,"");
+  t.done();
+}
+exports.ReportLeftLocate=function(t){
+  var r = new Report ();
+  r.fromModel(report_model1);
+  r.locateLeft();
+  // t.equal(4,r.lines.length,"");
+  t.equal(r.margin.left,r.lines[0].left,"");
+  t.equal(r.margin.left+r.DEFAULT.CELL.WIDTH,r.lines[0].cells[1].left,"");
+  t.equal(r.margin.left+r.DEFAULT.CELL.WIDTH*2,r.lines[0].cells[2].left,"");  
+  t.done();
+}
+
+exports.RenderLeftLocate=function(t){
+  var report = new Report ();
+  report.fromModel(report_model1);
+  report.locateLeft();
+  report.locateTop();
+  var content = [
+        {field1:"line1"},
+        {field1:2},
+        {field1:3}
+    ]
+  var r = new Render(report,content);
+  r.run();
+  t.equal(6,r.lines.length,"");
+  // t.equal(r.margin.left,r.lines[0].left,"");
+  // t.equal(r.margin.left+r.DEFAULT.CELL.WIDTH,r.lines[0].cells[1].left,"");
+  // t.equal(r.margin.left+r.DEFAULT.CELL.WIDTH*2,r.lines[0].cells[2].left,"");  
   t.done();
 }
