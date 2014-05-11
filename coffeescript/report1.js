@@ -34,13 +34,14 @@ Report.prototype.DEFAULT_PAGE_HEIGHT = 200;
 Report.prototype.addLine= function(line){
        this.lines.push(line)
 }
-Report.prototype.relocateTop=function(){
+Report.prototype.relocateLineTop=function(){
   var i = 0;
   var pre_line = null;
   for(i= 0;i<this.lines.length;i++){
     var line = this.lines[i];
     if (pre_line !=null){
       line.top = pre_line.top + pre_line.height;
+      line.relocateCellTop();
       // console.log(pre_line.top ,pre_line.height);
       pre_line = line;
     }
@@ -74,6 +75,13 @@ Report.prototype.detailRange= function(){
 Report.prototype.getLines=function(){
        return this.lines;
 }
+Line.prototype.relocateCellTop=function(){
+  var i;
+  for (i=0;i<this.cells.length;i++){
+    var cell = this.cells[i];
+    cell.top = this.top ;
+  }
+}
 Line.prototype.render=function(record){
   var r = new Line();
   r.left = this.left;
@@ -98,26 +106,27 @@ Line.prototype.isDetailLine=function(){
 }
 Line.prototype.default=function(){
   this.cells = [
-    new Cell(),
-    new Cell(),
-    new Cell(),
-    new Cell()
+    new Cell(this),
+    new Cell(this),
+    new Cell(this),
+    new Cell(this)
   ];
   return this;
 }
 Line.prototype.defaultDetail=function(text){
   this.cells = [
-    new Cell().defaultDetail(text),
-    new Cell().defaultDetail(text),
-    new Cell().defaultDetail(text),
-    new Cell().defaultDetail(text)
+    new Cell(this).defaultDetail(text),
+    new Cell(this).defaultDetail(text),
+    new Cell(this).defaultDetail(text),
+    new Cell(this).defaultDetail(text)
   ];
   return this;
 }
-function Cell(){
-       this.width=50;
-       this.text = "-"
-       this.cells = [];// sub cells
+function Cell(line){
+  this.line = line ;
+  this.width=50;
+  this.text = "-"
+  this.cells = [];// sub cells
 }
 Cell.prototype.isDetailCell=function(){
     return this.text.indexOf("#")===0 ;
@@ -298,27 +307,30 @@ extend(DetailCell,Cell);
    cc.log(s.lines[i].cells[0].text);
   }
 });
-(function (){
+
+exports.test1=function(t){
   var r = new Report();
-  // console.log(r.width==r.DEFAULT_PAGE_WIDTH);
-  // console.log(r.width);
-  // console.log(r.DEFAULT_PAGE_WIDTH);
   r.lines = ([
     new Line(r).default(),
     new Line(r).defaultDetail("#field1"),
     new Line(r).defaultDetail("#field1"),
     new Line(r).default()
     ]);
-  console.log(r.lines.length ==4);
-  console.log(r.lines[0].cells.length ==4);
-  console.log(r.detailRange().toString()==[1,2].toString());
-  r.relocateTop();
-  console.log(r.lines[0].top ==0*r.DEFAULT_LINE_HEIGHT);
-  console.log(r.lines[1].top ==1*r.DEFAULT_LINE_HEIGHT);
-  console.log(r.lines[2].top ==2*r.DEFAULT_LINE_HEIGHT);
-  console.log(r.lines[3].top ==(3*r.DEFAULT_LINE_HEIGHT));
-})()
-
-
+  t.ok(r.lines.length ==4);
+  t.ok(r.lines[0].cells.length ==4);
+  t.ok(r.detailRange().toString()==[1,2].toString());
+  r.relocateLineTop();
+  t.ok(r.lines[0].top ==0*r.DEFAULT_LINE_HEIGHT);
+  t.ok(r.lines[1].top ==1*r.DEFAULT_LINE_HEIGHT);
+  t.ok(r.lines[2].top ==2*r.DEFAULT_LINE_HEIGHT);
+  t.ok(r.lines[3].top ==3*r.DEFAULT_LINE_HEIGHT);
+  t.ok(r.lines[1].cells[0].top ==1*r.DEFAULT_LINE_HEIGHT);
+  t.ok(r.lines[2].cells[0].top ==2*r.DEFAULT_LINE_HEIGHT);
+  t.ok(r.lines[3].cells[0].top ==3*r.DEFAULT_LINE_HEIGHT);
+  t.ok(r.lines[1].cells[1].top ==1*r.DEFAULT_LINE_HEIGHT);
+  t.ok(r.lines[1].cells[2].top ==1*r.DEFAULT_LINE_HEIGHT);
+  t.ok(r.lines[1].cells[3].top ==1*r.DEFAULT_LINE_HEIGHT);
+  t.done();
+}
 
 

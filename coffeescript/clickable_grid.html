@@ -1,0 +1,65 @@
+<html>
+<head>
+  <title>Widget test</title>
+  <style type="text/css">
+    table{
+      border-collapse: collapse;
+      border: 1px solid black;
+    }
+    table td{
+      border: 1px solid black;
+    }
+    </style>
+</head>
+
+<body>
+  <form>
+    <table id="myTable"/>
+  </form>
+<script >
+   function b(){
+      // 构建table 10X10
+      var table = document.getElementById("myTable");
+      var i;var j;
+      for (i=0;i<5;i++){
+        var row = table.insertRow(i);
+        for (j=0;j<5;j++){
+          var cell = row.insertCell(j);
+          cell.innerHTML = i+ "X" +j;
+          cell.addEventListener("click",
+            function do_click(){
+              addInput(this);
+            });
+        }
+      }
+    }
+    function closeInput(elm) {
+        var td = elm.parentNode;
+        var value = elm.value;
+        td.removeChild(elm);
+        td.innerHTML = value;
+    }
+    function addInput(elm) {
+        if (elm.getElementsByTagName('input').length > 0) return;
+        var value = elm.innerHTML;
+        elm.innerHTML = '';
+        var input = document.createElement('input');
+        input.setAttribute('type', 'text');
+        input.setAttribute('value', value);
+        input.setAttribute('onBlur', 'closeInput(this)');
+        input.setAttribute('onkeypress', 'return runScript(event)');
+        elm.appendChild(input);
+        input.focus();
+    }
+    function runScript(e) {
+      if (e.keyCode == 13) {
+          // closeInput(e.srcElement);
+          e.srcElement.blur();
+          return false;// cancel event bubble 
+      }
+      return true;
+    }
+    b();
+   </script>
+</body>
+</html>
