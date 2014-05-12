@@ -1,0 +1,12 @@
+<table id="grid"  align="center">
+    <tr><td contenteditable="true" id="editor">placeholder</td></tr>
+</table>
+
+<script type="text/javascript">
+	document.getElementById("editor").addEventListener("input", function() {
+	    if (event.srcElement.innerHTML=="o")
+	       event.srcElement.style.backgroundColor = 'green';
+	    else
+	       event.srcElement.style.backgroundColor = 'red';
+	}, false);
+</script>
